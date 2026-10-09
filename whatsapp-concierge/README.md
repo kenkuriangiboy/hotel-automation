@@ -24,6 +24,10 @@ flowchart LR
     A -- error --> F[Fallback reply:<br/>'our team will reply shortly']
 ```
 
+**Demo on WhatsApp (sped up 3x):** a guest asks about check-in, asks for the suite price in Malayalam, then requests a suite for 20–22 October.
+
+![WhatsApp concierge demo](../docs/screenshots/whatsapp-concierge-demo.gif)
+
 **The staff alert, as received on the staff phone:**
 
 ![Staff booking alert on WhatsApp](../docs/screenshots/staff-alert.png)
