@@ -24,6 +24,10 @@ flowchart LR
     A -- error --> F[Fallback reply:<br/>'our team will reply shortly']
 ```
 
+**The staff alert, as received on the staff phone:**
+
+![Staff booking alert on WhatsApp](../docs/screenshots/staff-alert.png)
+
 ## How it works
 
 - **Webhook verification.** Meta checks the URL once with a GET request carrying `hub.challenge`; a separate GET webhook echoes it back. Guest messages then arrive as POST requests on the same path.
