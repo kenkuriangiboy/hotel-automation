@@ -92,4 +92,4 @@ Workflow files in this repository are cleaned before upload: API keys, tokens, p
 
 ---
 
-Ken Kurian Giboy · [LinkedIn](https://www.linkedin.com/in/ken-kurian-giboy/)
+Ken Kurian Giboy · [Portfolio](https://kenkuriangiboy.lovable.app/) · [Case study](https://kenkuriangiboy.lovable.app/case-study/hotel-automation) · [LinkedIn](https://www.linkedin.com/in/ken-kurian-giboy/)
