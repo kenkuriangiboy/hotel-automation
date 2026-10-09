@@ -4,6 +4,10 @@ One small workflow that sends an email whenever any other workflow fails, so pro
 
 ## Flow
 
+![Error alerts workflow in n8n](../docs/screenshots/error-alerts-workflow.png)
+
+![Example alert email](../docs/screenshots/error-alert-email.png)
+
 ```mermaid
 flowchart LR
     X[Any workflow fails<br/>in production] --> T[Error Trigger] --> E[Email alert:<br/>workflow, failed node,<br/>error, link to the run]

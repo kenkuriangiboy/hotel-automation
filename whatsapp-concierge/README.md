@@ -4,6 +4,8 @@ Answers guest questions on the hotel's WhatsApp number, in the guest's own langu
 
 ## Flow
 
+![WhatsApp concierge workflow in n8n](../docs/screenshots/whatsapp-concierge-workflow.png)
+
 ```mermaid
 flowchart LR
     subgraph Verify[One-time: Meta verification]

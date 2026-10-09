@@ -6,6 +6,12 @@ The goal: guests who book directly avoid the roughly 20% commission OTAs charge,
 
 ## Flow
 
+| Booking form | Razorpay checkout (test mode) |
+|---|---|
+| ![Booking form](../docs/screenshots/direct-booking-form.png) | ![Razorpay checkout](../docs/screenshots/razorpay-checkout.png) |
+| **Confirmed after the webhook** | **Confirmation email from n8n** |
+| ![Booking confirmed](../docs/screenshots/booking-confirmed.png) | ![Confirmation email](../docs/screenshots/confirmation-email.png) |
+
 ```mermaid
 sequenceDiagram
     participant G as Guest browser

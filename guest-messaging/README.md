@@ -4,6 +4,8 @@ Sends every guest three WhatsApp messages across their stay, using approved What
 
 ## Flow
 
+![Guest messaging workflow in n8n](../docs/screenshots/guest-messaging-workflow.png)
+
 ```mermaid
 flowchart LR
     T[Sheets trigger<br/>new booking row] --> I{Check-in more than<br/>1 day away and<br/>guest name present?}

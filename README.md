@@ -41,6 +41,11 @@ flowchart LR
 
 ## Workflows
 
+Auto-imported OTA bookings landing in the booking portal (guest details blurred):
+
+![Booking portal with auto-imported bookings](docs/screenshots/booking-portal.png)
+
+
 | Workflow | What it does | Key techniques |
 |---|---|---|
 | [Email extraction](email-extraction/) | Reads OTA confirmation and cancellation emails, extracts guest, dates, rooms and amount with an AI agent, and creates or cancels the booking through the portal's API | Gmail triggers, AI agent with JSON output, Code node cleanup, retries, fallback model |

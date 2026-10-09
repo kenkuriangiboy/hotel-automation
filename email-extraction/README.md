@@ -4,6 +4,8 @@ Turns booking and cancellation emails from MakeMyTrip, Goibibo and Agoda into re
 
 ## Flow
 
+![Email extraction workflow in n8n](../docs/screenshots/email-extraction-workflow.png)
+
 ```mermaid
 flowchart LR
     T1[Gmail trigger<br/>MakeMyTrip] --> G
