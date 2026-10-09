@@ -1,0 +1,393 @@
+{
+  "name": "AI WhatsApp concierge",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "whatsapp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f28a3d4c-683b-41d0-ba13-f04461bbab02",
+      "name": "Webhook",
+      "webhookId": "3778c9cf-fec8-4d4c-b092-454974784e94"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=     {{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "93050d54-f5aa-465f-83f0-e5c77ff3280c",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "d312a586-d047-4935-bab6-ab4ec5d07fbb",
+      "name": "Webhook1",
+      "webhookId": "da4b61a0-7148-4826-89bd-3792fac78f1f"
+    },
+    {
+      "parameters": {
+        "jsCode": "const value = $json.body.entry?.[0]?.changes?.[0]?.value;\nconst msg = value?.messages?.[0];\n\n// Ignore status updates and anything that isn't a text message\nif (!msg || msg.type !== 'text') {\n  return [];\n}\n\nreturn [{\n  json: {\n    from: msg.from,                              // guest's phone number\n    text: msg.text.body,                         // what they wrote\n    name: value.contacts?.[0]?.profile?.name,    // their WhatsApp name\n    message_id: msg.id\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "a7bd2aeb-45f4-423f-b179-2e0ba2a04f06",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are the WhatsApp assistant for Grand Victoria Hotel, a modern premium\nhotel in Erumely, Kerala. Reply like a warm, helpful front desk: short,\nfriendly and clear. Reply in the language the guest writes in (English,\nMalayalam, Tamil, Hindi, etc.). Keep replies under 80 words. Use at most\none emoji.\n\nHOTEL FACTS\n- Address: Erumely–Mundakayam Road, Erumely P.O., Charala, Erumely,\n  Kanjirappally, Kottayam District, Kerala.\n- Nearby: Sree Dharma Sastha Temple and Vavar Palli (Erumely) are under\n  1.5 km away. Sabarimala Temple is about 45 km away. Kuttikanam hill\n  station is about 33 km away.\n- Check-in: 2:00 PM. Check-out: 12:00 PM.\n- Rooms: 15 Deluxe rooms and 2 Suites (Suites are larger). All rooms are\n  modern and air-conditioned.\n- Rates: Deluxe ₹2,800 per night. Suite ₹4,000 per night.\n- Facilities: 24/7 car parking, 24/7 reception and CCTV surveillance,\n  laundry service, taxi service, luggage storage, travel desk and\n  sightseeing help.\n- Food: no in-house restaurant; in-room dining is available through a\n  partner restaurant that delivers to the hotel.\n- Staff contact (calls and WhatsApp): YOUR_STAFF_PHONE\n\nRULES\n- Only use the facts above. Never invent prices, availability, policies\n  or facilities.\n- When asked about prices, share the rates above (per room, per night).\n  Mention that the final rate is confirmed by staff along with\n  availability.\n- All bookings are subject to availability, which staff must confirm.\n  Never confirm a booking or say rooms are available. If the guest wants\n  to book, ask for: check-in date, check-out date, number of guests,\n  number of rooms, and room type (Deluxe or Suite). Then say their request\n  is noted, bookings are subject to availability, and staff will confirm\n  availability and price shortly.\n- If you don't know the answer, say staff will help and share the staff\n  contact number.\n- For complaints, refunds, cancellations or anything urgent, apologise\n  briefly and share the staff contact number.\n- Never ask for card, bank or ID details on WhatsApp.\n- Respond in the required JSON format with three fields:\n  \"reply\": your message to the guest.\n  \"notify_staff\": true only when the guest has given their dates and\n  room needs for a booking request for the first time; otherwise false.\n  \"summary\": when notify_staff is true, one line with room type, dates,\n  number of guests and rooms (e.g. \"Suite, 10-12 Oct, 2 guests, 1 room\");\n  otherwise an empty string. Never use line breaks in the summary."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        992,
+        48
+      ],
+      "id": "4d3d8e1e-87c3-4271-a6da-6d6ca5a32b70",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        256
+      ],
+      "id": "753639ba-a6e2-488d-98c8-058fe2516e36",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/YOUR_PHONE_NUMBER_ID/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_WHATSAPP_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Code in JavaScript').item.json.from }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": {{ JSON.stringify($json.output.reply) }} }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1360,
+        48
+      ],
+      "id": "97abe1c0-9510-4b0b-8f27-9f75850872f9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=   {{ $('Code in JavaScript').item.json.from }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1104,
+        288
+      ],
+      "id": "a05e5e55-8f0e-45bc-b955-202a70a86625",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-chat",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        976,
+        416
+      ],
+      "id": "1f266228-0765-4489-a892-0f53e289ab24",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/YOUR_PHONE_NUMBER_ID/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_WHATSAPP_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Code in JavaScript').item.json.from }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": \"Thanks for your message! Our team will reply shortly. For urgent help, call YOUR_STAFF_PHONE.\" }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1360,
+        320
+      ],
+      "id": "905123f1-f6bc-4c59-bfee-d39394bd41fc",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "   {\n     \"reply\": \"Thanks! Your request is noted. Staff will confirm availability shortly.\",\n     \"notify_staff\": true,\n     \"summary\": \"Suite, 10-12 Oct, 2 guests, 1 room\"\n   }"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1216,
+        512
+      ],
+      "id": "0b03f707-4f56-42a7-b3cb-65fb0f0582e7",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4fab0215-6277-4268-88c6-98ca3758c47b",
+              "leftValue": "={{ $json.output.notify_staff }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        -144
+      ],
+      "id": "a6efabb6-0af9-4e2e-872a-0a3913a81529",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/YOUR_PHONE_NUMBER_ID/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_WHATSAPP_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"YOUR_STAFF_NUMBER\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"staff_booking_alert\",\n    \"language\": { \"code\": \"en\" },\n    \"components\": [{\n      \"type\": \"body\",\n      \"parameters\": [\n        { \"type\": \"text\", \"text\": {{ JSON.stringify($('Code in JavaScript').item.json.name || 'Guest') }} },\n        { \"type\": \"text\", \"text\": \"{{ $('Code in JavaScript').item.json.from }}\" },\n        { \"type\": \"text\", \"text\": {{ JSON.stringify($json.output.summary) }} }\n      ]\n    }]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1760,
+        -240
+      ],
+      "id": "d255d3f9-de43-4278-b947-7b493871cb25",
+      "name": "HTTP Request2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
