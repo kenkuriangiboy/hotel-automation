@@ -48,7 +48,7 @@ flowchart LR
 | [AI WhatsApp concierge](whatsapp-concierge/) | Answers guest questions in their language, collects booking requests and alerts staff | Meta webhook verification, conversation memory, structured output parser, error-path fallback reply |
 | [Error alerts](error-alerts/) | One workflow that emails an alert whenever any other workflow fails | n8n Error Trigger, workflow-level error handling |
 
-A separate prototype for a second property tested commission-free direct booking: Razorpay checkout, bookings confirmed only by a signature-verified webhook, and a confirmation email sent through n8n.
+A separate [direct booking & payments prototype](direct-booking-prototype/) for a second property tested commission-free direct booking: Razorpay checkout, bookings confirmed only by a signature-verified webhook, and a confirmation email sent through n8n.
 
 ## Infrastructure
 
