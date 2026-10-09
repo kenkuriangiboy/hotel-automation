@@ -4,6 +4,20 @@ Automation I designed and run for a 17-room hotel in Kerala, India. It turns OTA
 
 Built with **n8n** (self-hosted), **AI agents** (Gemini, with a DeepSeek fallback), the **WhatsApp Cloud API**, a **Lovable + Supabase** booking portal, and **Razorpay** for payments.
 
+## The problem
+
+The hotel runs at around 73% occupancy and is fully booked for about 3 months of peak season. About 70% of bookings come from OTAs (MakeMyTrip, Goibibo, Agoda). The front desk has one person on duty per shift, who was entering about 200 online bookings a month by hand (up to ~240 in peak season), 10–15 minutes each, while also handling check-ins, calls and guests.
+
+## Results
+
+| | |
+|---|---|
+| Online bookings imported automatically | ~200 a month (up to ~240 in peak season) |
+| Staff time saved | ~35–50 hours a month, about an hour per shift |
+| Guest WhatsApp messages sent automatically | ~600 a month |
+| Guest questions | answered in seconds, 24/7, in the guest's language |
+| Failures | flagged by email immediately instead of found by chance |
+
 ## How it fits together
 
 ```mermaid
