@@ -1,0 +1,415 @@
+{
+  "name": "OTA email extraction",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "sender": "go-mmt.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -432,
+        -240
+      ],
+      "id": "82710656-83fe-452f-8b1b-7a6053dc1752",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract booking details from this hotel booking confirmation email (raw HTML) and \nreturn ONLY valid JSON with these exact fields, ignoring all HTML tags and \nstyling — read only the actual text content:\n{\n  \"guest_name\": \"\",\n  \"check_in\": \"YYYY-MM-DD\",\n  \"check_out\": \"YYYY-MM-DD\",\n  \"deluxe_rooms\": 0,\n  \"suite_rooms\": 0,\n  \"total_amount\": 0,\n  \"advance_paid\": 0,\n  \"booking_id\": \"\"\n}\n\nRoom types are usually listed as \"Standard AC Room\" or similar — treat \nthese as Deluxe unless explicitly labeled Suite. Count total rooms based \non the \"X Room(s)\" summary and the individual room type lines shown.\n\nFor advance_paid: if the email indicates the booking is fully \"PREPAID\" \nor shows \"Payment Status: Paid Online\" with no separate advance mentioned, \nset advance_paid equal to total_amount (treat as fully paid). If a specific \npartial/advance amount is mentioned, use that exact figure. If nothing \nabout payment status is mentioned, set advance_paid to 0.\n\nEmail content:\n{{ $json.html }}",
+        "needsFallback": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        176,
+        -224
+      ],
+      "id": "9ae7ab19-3b36-42af-8e61-30a7c5a3c1f7",
+      "name": "AI Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-tts",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        -48
+      ],
+      "id": "cbca49f2-0893-4517-ab65-a2e94fe1497f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        -240
+      ],
+      "id": "fe5f1365-b3ab-4032-97a4-19d34cb68df3",
+      "name": "Get a message",
+      "webhookId": "8d7aeda2-db6d-461b-a34c-b4dac9013eb6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $input.item.json.output;\n\n// Strip markdown code fences if present\nraw = raw.replace(/```json\\s*/g, '').replace(/```\\s*/g, '').trim();\n\nconst parsed = JSON.parse(raw);\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -224
+      ],
+      "id": "73a4a4f7-9a10-4cd9-b9f9-e68fc072674c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-BOOKING-PORTAL/api/public/bookings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"guest_name\": \"{{ $json.guest_name }}\",\n  \"check_in\": \"{{ $json.check_in }}\",\n  \"check_out\": \"{{ $json.check_out }}\",\n  \"deluxe_rooms\": {{ $json.deluxe_rooms }},\n  \"suite_rooms\": {{ $json.suite_rooms }},\n  \"total_amount\": {{ $json.total_amount }},\n  \"comments\": \"Auto-imported from MakeMyTrip — Booking ID {{ $json.booking_id }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        832,
+        -240
+      ],
+      "id": "026185a9-cdb7-4d49-a377-559c7ffb8a8a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "sender": "goibibo.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -416,
+        -416
+      ],
+      "id": "aeb99cc8-bbed-436e-95ca-2a6495c51948",
+      "name": "Gmail Trigger1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "sender": "no-reply@agoda.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -432,
+        -16
+      ],
+      "id": "cc096789-84e9-493e-95d3-835fd0382506",
+      "name": "Gmail Trigger2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bba8757b-1dd0-4040-9ec4-eff79ce97cc0",
+              "leftValue": "={{ $json.subject.toLowerCase() }}",
+              "rightValue": "cancel",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -48,
+        -240
+      ],
+      "id": "ced717db-ebb8-45a8-816c-486e6be7576a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const subject = $json.subject;\n\n// Extract the booking ID that follows patterns like:\n// \"Cancellation received for Booking ID : GH70132277316572\"\n// \"Agoda Booking ID 1993445358 - CANCELLED...\"\nconst match = subject.match(/(?:Booking ID\\s*[:\\s]\\s*)([A-Za-z0-9]+)/i);\nconst bookingId = match ? match[1] : null;\n\nlet platform = \"Unknown\";\nif (subject.includes(\"MakeMyTrip\")) platform = \"MakeMyTrip\";\nelse if (subject.includes(\"GoIbibo\") || subject.includes(\"Goibibo\")) platform = \"Goibibo\";\nelse if (subject.toLowerCase().includes(\"agoda\")) platform = \"Agoda\";\n\nreturn [{ json: { booking_id: bookingId, platform: platform } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        -400
+      ],
+      "id": "d5babf83-473f-43fc-b59f-f1d8c5cbab5d",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-BOOKING-PORTAL/api/public/bookings/cancel",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"booking_id\": \"{{ $json.booking_id }}\",\n  \"platform\": \"{{ $json.platform }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        416,
+        -400
+      ],
+      "id": "9c646af2-a49b-4b25-a9c9-0d8d7c4dbef2",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        128,
+        80
+      ],
+      "id": "c5553678-5720-4a38-851f-1a01a8e08626",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "DeepSeek account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
