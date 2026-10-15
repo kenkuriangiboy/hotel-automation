@@ -59,6 +59,10 @@ The AI WhatsApp concierge in action (sped up 3x):
 
 <img src="docs/screenshots/whatsapp-concierge-demo.gif" alt="WhatsApp concierge demo" width="280">
 
+Voice notes in French, transcribed with Groq Whisper and answered in French (sped up 4x):
+
+<img src="docs/screenshots/whatsapp-concierge-demo-fr.gif" alt="French voice-note demo" width="280">
+
 Auto-imported OTA bookings landing in the booking portal (guest details blurred):
 
 ![Booking portal with auto-imported bookings](docs/screenshots/booking-portal.png)

@@ -28,6 +28,10 @@ flowchart LR
 
 ![WhatsApp concierge demo](../docs/screenshots/whatsapp-concierge-demo.gif)
 
+**Voice notes in French (sped up 4x):** the guest sends voice notes; they are downloaded from WhatsApp, transcribed with Groq Whisper, and answered in French. The request (1 Deluxe room, 5–7 November, 2 guests) is passed to staff.
+
+<img src="../docs/screenshots/whatsapp-concierge-demo-fr.gif" alt="French voice-note demo" width="280">
+
 **The staff alert, as received on the staff phone:**
 
 ![Staff booking alert on WhatsApp](../docs/screenshots/staff-alert.png)
@@ -35,7 +39,7 @@ flowchart LR
 ## How it works
 
 - **Webhook verification.** Meta checks the URL once with a GET request carrying `hub.challenge`; a separate GET webhook echoes it back. Guest messages then arrive as POST requests on the same path.
-- **Filtering.** Meta also sends delivery and read receipts to the webhook. The Code node keeps only text messages and returns an empty result for everything else, which ends the run quietly.
+- **Filtering.** Meta also sends delivery and read receipts to the webhook. The Code node keeps only text and voice messages and returns an empty result for everything else, which ends the run quietly.
 - **The AI agent** answers from hotel facts and rules in its system message: it only uses listed facts, shares rates but never confirms availability, and hands complaints and anything it doesn't know to staff.
 - **Memory**, keyed by the guest's phone number, keeps the last 10 messages, so a guest can give their dates over several messages.
 - **Structured output** makes the agent return three fields. `reply` goes to the guest; `notify_staff` decides whether staff are alerted; `summary` is the one-line request staff receive.
