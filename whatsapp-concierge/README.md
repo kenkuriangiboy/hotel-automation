@@ -57,6 +57,8 @@ flowchart LR
 
 - **Webhook verification.** Meta checks the URL once with a GET request carrying `hub.challenge`; a separate GET webhook echoes it back. Guest messages then arrive as POST requests on the same path.
 - **Filtering.** Meta also sends delivery and read receipts to the webhook. The Code node keeps only text and voice messages and returns an empty result for everything else, which ends the run quietly.
+- **Voice notes.** WhatsApp sends only a media ID. One request swaps it for a short-lived download URL, a second downloads the .ogg file, and Groq's Whisper model transcribes it. An Edit Fields node then gives the transcript the same shape as a typed message, so one agent handles both.
+- **Knowledge base (RAG).** The hotel FAQ lives in a Google Doc that staff can edit. A separate loader workflow splits it into ~600-character chunks, turns each into a Gemini embedding and stores it in Supabase with pgvector (`supabase-setup.sql`). The agent's `hotel_faq` tool embeds the guest's question with the same model and retrieves the 4 closest chunks; the system message tells it to answer only from them and to hand anything else to staff.
 - **The AI agent** follows the rules in its system message: answer only from the FAQ tool, share rates but never confirm availability, and hand complaints and anything it doesn't know to staff.
 - **Memory**, keyed by the guest's phone number, keeps the last 10 messages, so a guest can give their dates over several messages.
 - **Structured output** makes the agent return three fields. `reply` goes to the guest; `notify_staff` decides whether staff are alerted; `summary` is the one-line request staff receive.
