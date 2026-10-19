@@ -2,7 +2,7 @@
 
 Automation I designed and run for a 17-room hotel in Kerala, India. It turns OTA booking emails into structured bookings, messages guests on WhatsApp across their whole stay, answers guest questions with a multilingual AI assistant, and alerts staff when something needs a human.
 
-Built with **n8n** (self-hosted), **AI agents** (Gemini, with a DeepSeek fallback), the **WhatsApp Cloud API**, a **Lovable + Supabase** booking portal, and **Razorpay** for payments.
+Built with **n8n** (self-hosted), **AI agents** (Gemini, with a DeepSeek fallback), a **RAG knowledge base** (Supabase pgvector), the **WhatsApp Cloud API**, a **Lovable + Supabase** booking portal, and **Razorpay** for payments.
 
 ## The problem
 
@@ -72,7 +72,7 @@ Auto-imported OTA bookings landing in the booking portal (guest details blurred)
 |---|---|---|
 | [Email extraction](email-extraction/) | Reads OTA confirmation and cancellation emails, extracts guest, dates, rooms and amount with an AI agent, and creates or cancels the booking through the portal's API | Gmail triggers, AI agent with JSON output, Code node cleanup, retries, fallback model |
 | [Guest messaging](guest-messaging/) | Sends booking confirmations, a reminder the day before arrival and a review request after checkout | WhatsApp templates, Wait nodes, same-day booking branch, status tracking |
-| [AI WhatsApp concierge](whatsapp-concierge/) | Answers guest questions in their language, collects booking requests and alerts staff | Meta webhook verification, conversation memory, structured output parser, error-path fallback reply |
+| [AI WhatsApp concierge](whatsapp-concierge/) | Answers guest questions by text or voice note, in their language, from the hotel's FAQ; collects booking requests and alerts staff | RAG (Supabase pgvector + Gemini embeddings), Groq Whisper transcription, conversation memory, structured output, error-path fallback |
 | [Error alerts](error-alerts/) | One workflow that emails an alert whenever any other workflow fails | n8n Error Trigger, workflow-level error handling |
 
 A separate [direct booking & payments prototype](direct-booking-prototype/) for a second property tested commission-free direct booking: Razorpay checkout, bookings confirmed only by a signature-verified webhook, and a confirmation email sent through n8n.
