@@ -58,7 +58,7 @@ flowchart LR
 - **Webhook verification.** Meta checks the URL once with a GET request carrying `hub.challenge`; a separate GET webhook echoes it back. Guest messages then arrive as POST requests on the same path.
 - **Filtering.** Meta also sends delivery and read receipts to the webhook. The Code node keeps only text and voice messages and returns an empty result for everything else, which ends the run quietly.
 - **Voice notes.** WhatsApp sends only a media ID. One request swaps it for a short-lived download URL, a second downloads the .ogg file, and Groq's Whisper model transcribes it. An Edit Fields node then gives the transcript the same shape as a typed message, so one agent handles both.
-- **Knowledge base (RAG).** The hotel FAQ lives in a Google Doc that staff can edit. A separate loader workflow splits it into ~600-character chunks, turns each into a Gemini embedding and stores it in Supabase with pgvector (`supabase-setup.sql`). The agent's `hotel_faq` tool embeds the guest's question with the same model and retrieves the 4 closest chunks; the system message tells it to answer only from them and to hand anything else to staff.
+- **Knowledge base (RAG).** The hotel FAQ lives in a Google Doc that staff can edit. A separate loader workflow ([`rag-load-faq.json`](rag-load-faq.json)) splits it into ~600-character chunks, turns each into a Gemini embedding and stores it in Supabase with pgvector (`supabase-setup.sql`). The agent's `hotel_faq` tool embeds the guest's question with the same model and retrieves the 4 closest chunks; the system message tells it to answer only from them and to hand anything else to staff.
 - **The AI agent** follows the rules in its system message: answer only from the FAQ tool, share rates but never confirm availability, and hand complaints and anything it doesn't know to staff.
 - **Memory**, keyed by the guest's phone number, keeps the last 10 messages, so a guest can give their dates over several messages.
 - **Structured output** makes the agent return three fields. `reply` goes to the guest; `notify_staff` decides whether staff are alerted; `summary` is the one-line request staff receive.
@@ -74,7 +74,7 @@ flowchart LR
 
 Import the JSON into n8n, then:
 - connect Gemini, DeepSeek, Groq and Supabase credentials
-- run `supabase-setup.sql` in your Supabase project (and make sure its Data API is enabled), then load your own FAQ into the `documents` table with a loader workflow (Google Docs → Supabase Vector Store insert, with the same `models/gemini-embedding-001` embeddings)
+- run `supabase-setup.sql` in your Supabase project (and make sure its Data API is enabled), then import `rag-load-faq.json`, point it at your own FAQ Google Doc and run it once to fill the `documents` table. Empty the table (`delete from documents;`) before re-running it, or you'll get duplicate chunks
 - set `YOUR_PHONE_NUMBER_ID`, `YOUR_WHATSAPP_TOKEN`, `YOUR_GROQ_API_KEY`, `YOUR_STAFF_NUMBER` and `YOUR_STAFF_PHONE` (better: move the tokens into n8n Header Auth credentials)
 - create and get approval for a `staff_booking_alert` template with three parameters (guest name, phone, request)
 - adapt the system message to your property
